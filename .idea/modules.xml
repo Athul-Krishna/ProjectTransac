@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/ApiGateway/ApiGateway.iml" filepath="$PROJECT_DIR$/ApiGateway/ApiGateway.iml" />
+      <module fileurl="file://$PROJECT_DIR$/DiscoveryServer/DiscoveryServer.iml" filepath="$PROJECT_DIR$/DiscoveryServer/DiscoveryServer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ProductsService/ProductsService.iml" filepath="$PROJECT_DIR$/ProductsService/ProductsService.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ProjectTransaction.iml" filepath="$PROJECT_DIR$/.idea/ProjectTransaction.iml" />
+    </modules>
+  </component>
+</project>
