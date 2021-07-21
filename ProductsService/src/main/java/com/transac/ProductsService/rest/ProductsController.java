@@ -24,10 +24,10 @@ public class ProductsController {
     @PostMapping
     public String createProduct(@RequestBody CreateProductRestModel createProductRestModel) {
         CreateProductCommand createProductCommand = CreateProductCommand.builder()
+                .productId(UUID.randomUUID().toString())
                 .title(createProductRestModel.getTitle())
                 .price(createProductRestModel.getPrice())
-                .quantity(createProductRestModel.getQuantity())
-                .productId(UUID.randomUUID().toString()).build();
+                .quantity(createProductRestModel.getQuantity()).build();
 
         String returnValue;
         try {
