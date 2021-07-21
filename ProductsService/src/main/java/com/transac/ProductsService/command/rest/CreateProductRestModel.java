@@ -1,4 +1,4 @@
-package com.transac.ProductsService.rest;
+package com.transac.ProductsService.command.rest;
 
 import lombok.Data;
 

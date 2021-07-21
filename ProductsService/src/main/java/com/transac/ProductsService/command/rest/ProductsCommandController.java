@@ -1,4 +1,4 @@
-package com.transac.ProductsService.rest;
+package com.transac.ProductsService.command.rest;
 
 import com.transac.ProductsService.command.CreateProductCommand;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -10,13 +10,13 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/products")
-public class ProductsController {
+public class ProductsCommandController {
 
     private final Environment env;
     private final CommandGateway commandGateway;
 
     @Autowired
-    public ProductsController(Environment env, CommandGateway commandGateway) {
+    public ProductsCommandController(Environment env, CommandGateway commandGateway) {
         this.env = env;
         this.commandGateway = commandGateway;
     }
@@ -38,18 +38,18 @@ public class ProductsController {
         return returnValue;
     }
 
-    @GetMapping
-    public String getProduct() {
-        return "HTTP GET Handled " + env.getProperty("local.server.port");
-    }
-
-    @PutMapping
-    public String updateProduct() {
-        return "HTTP PUT Handled";
-    }
-
-    @DeleteMapping
-    public String deleteProduct() {
-        return "HTTP DELETE Handled";
-    }
+//    @GetMapping
+//    public String getProduct() {
+//        return "HTTP GET Handled " + env.getProperty("local.server.port");
+//    }
+//
+//    @PutMapping
+//    public String updateProduct() {
+//        return "HTTP PUT Handled";
+//    }
+//
+//    @DeleteMapping
+//    public String deleteProduct() {
+//        return "HTTP DELETE Handled";
+//    }
 }
