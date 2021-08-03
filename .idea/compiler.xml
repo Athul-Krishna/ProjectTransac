@@ -10,11 +10,13 @@
         <module name="DiscoveryServer" />
         <module name="ProductsService" />
         <module name="ApiGateway" />
+        <module name="OrdersService" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="ApiGateway" target="11" />
       <module name="DiscoveryServer" target="11" />
+      <module name="OrdersService" target="11" />
       <module name="ProductsService" target="11" />
     </bytecodeTargetLevel>
   </component>
@@ -22,6 +24,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="ApiGateway" options="-parameters" />
       <module name="DiscoveryServer" options="-parameters" />
+      <module name="OrdersService" options="-parameters" />
       <module name="ProductsService" options="-parameters" />
     </option>
   </component>
