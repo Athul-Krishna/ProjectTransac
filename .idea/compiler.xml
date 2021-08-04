@@ -9,10 +9,11 @@
         <outputRelativeToContentRoot value="true" />
         <module name="core" />
         <module name="DiscoveryServer" />
-        <module name="ProductsService" />
         <module name="UsersService" />
-        <module name="ApiGateway" />
+        <module name="PaymentsService" />
         <module name="OrdersService" />
+        <module name="ProductsService" />
+        <module name="ApiGateway" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -20,6 +21,7 @@
       <module name="core" target="11" />
       <module name="DiscoveryServer" target="11" />
       <module name="OrdersService" target="11" />
+      <module name="PaymentsService" target="11" />
       <module name="ProductsService" target="11" />
       <module name="UsersService" target="11" />
     </bytecodeTargetLevel>
@@ -29,6 +31,7 @@
       <module name="ApiGateway" options="-parameters" />
       <module name="DiscoveryServer" options="-parameters" />
       <module name="OrdersService" options="-parameters" />
+      <module name="PaymentsService" options="-parameters" />
       <module name="ProductsService" options="-parameters" />
       <module name="UsersService" options="-parameters" />
       <module name="core" options="-parameters" />
