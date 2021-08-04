@@ -8,6 +8,7 @@
         <option value="$PROJECT_DIR$/ApiGateway/pom.xml" />
         <option value="$PROJECT_DIR$/OrdersService/pom.xml" />
         <option value="$PROJECT_DIR$/core/pom.xml" />
+        <option value="$PROJECT_DIR$/UsersService/pom.xml" />
       </list>
     </option>
   </component>
