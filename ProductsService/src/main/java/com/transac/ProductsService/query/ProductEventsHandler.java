@@ -3,9 +3,12 @@ package com.transac.ProductsService.query;
 import com.transac.ProductsService.core.data.ProductEntity;
 import com.transac.ProductsService.core.data.ProductsRepository;
 import com.transac.ProductsService.core.events.ProductCreatedEvent;
+import com.transac.core.events.ProductReservedEvent;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.messaging.interceptors.ExceptionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Component;
 public class ProductEventsHandler {
 
     private final ProductsRepository productsRepository;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProductEventsHandler.class);
 
     public ProductEventsHandler(ProductsRepository productsRepository) {
         this.productsRepository = productsRepository;
@@ -38,5 +42,15 @@ public class ProductEventsHandler {
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
+    }
+
+    @EventHandler
+    public void on(ProductReservedEvent event) {
+        ProductEntity productEntity = productsRepository.findByProductId(event.getProductId());
+        productEntity.setQuantity(productEntity.getQuantity() - event.getQuantity());
+        productsRepository.save(productEntity);
+
+        LOGGER.info("ProductReservedEvent is called for orderId: " + event.getOrderId() +
+                " and productId: " + event.getProductId());
     }
 }
