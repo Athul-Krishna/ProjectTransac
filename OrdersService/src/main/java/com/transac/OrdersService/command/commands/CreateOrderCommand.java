@@ -1,4 +1,4 @@
-package com.transac.OrdersService.command;
+package com.transac.OrdersService.command.commands;
 
 import com.transac.OrdersService.core.models.OrderStatus;
 import lombok.Builder;

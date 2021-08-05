@@ -1,5 +1,7 @@
 package com.transac.OrdersService.saga;
 
+import com.transac.OrdersService.command.commands.ApproveOrderCommand;
+import com.transac.OrdersService.core.events.OrderApprovedEvent;
 import com.transac.OrdersService.core.events.OrderCreatedEvent;
 import com.transac.core.commands.ProcessPaymentCommand;
 import com.transac.core.commands.ReserveProductCommand;
@@ -12,7 +14,9 @@ import org.axonframework.commandhandling.CommandMessage;
 import org.axonframework.commandhandling.CommandResultMessage;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
+import org.axonframework.modelling.saga.EndSaga;
 import org.axonframework.modelling.saga.SagaEventHandler;
+import org.axonframework.modelling.saga.SagaLifecycle;
 import org.axonframework.modelling.saga.StartSaga;
 import org.axonframework.queryhandling.QueryGateway;
 import org.axonframework.spring.stereotype.Saga;
@@ -27,6 +31,8 @@ import java.util.concurrent.TimeUnit;
 public class OrderSaga {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderSaga.class);
+
+    @Autowired
     private transient QueryGateway queryGateway;
 
     @Autowired
@@ -100,5 +106,14 @@ public class OrderSaga {
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(PaymentProcessedEvent paymentProcessedEvent) {
         // Send an ApproveOrderCommand
+        ApproveOrderCommand approveOrderCommand = new ApproveOrderCommand(paymentProcessedEvent.getOrderId());
+        commandGateway.send(approveOrderCommand);
+    }
+
+    @EndSaga
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(OrderApprovedEvent orderApprovedEvent) {
+        LOGGER.info("Order is approved! Order saga is complete for orderId: " + orderApprovedEvent.getOrderId());
+        // SagaLifecycle.end();
     }
 }

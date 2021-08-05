@@ -1,5 +1,8 @@
 package com.transac.OrdersService.command;
 
+import com.transac.OrdersService.command.commands.ApproveOrderCommand;
+import com.transac.OrdersService.command.commands.CreateOrderCommand;
+import com.transac.OrdersService.core.events.OrderApprovedEvent;
 import com.transac.OrdersService.core.events.OrderCreatedEvent;
 import com.transac.OrdersService.core.models.OrderStatus;
 import org.axonframework.commandhandling.CommandHandler;
@@ -29,13 +32,24 @@ public class OrderAggregate {
         AggregateLifecycle.apply(orderCreatedEvent);
     }
 
+    @CommandHandler
+    public void handle(ApproveOrderCommand approveOrderCommand) {
+        OrderApprovedEvent orderApprovedEvent = new OrderApprovedEvent(approveOrderCommand.getOrderId());
+        AggregateLifecycle.apply(orderApprovedEvent);
+    }
+
     @EventSourcingHandler
-    public void on(OrderCreatedEvent orderCreatedEvent) throws Exception{
+    protected void on(OrderCreatedEvent orderCreatedEvent) throws Exception{
         this.orderId = orderCreatedEvent.getOrderId();
         this.userId = orderCreatedEvent.getUserId();
         this.productId = orderCreatedEvent.getProductId();
         this.quantity = orderCreatedEvent.getQuantity();
         this.addressId = orderCreatedEvent.getAddressId();
         this.orderStatus = orderCreatedEvent.getOrderStatus();
+    }
+
+    @EventSourcingHandler
+    protected void on(OrderApprovedEvent orderApprovedEvent) {
+        this.orderStatus = orderApprovedEvent.getOrderStatus();
     }
 }

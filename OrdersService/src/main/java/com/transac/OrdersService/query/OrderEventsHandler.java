@@ -2,6 +2,7 @@ package com.transac.OrdersService.query;
 
 import com.transac.OrdersService.core.data.OrderEntity;
 import com.transac.OrdersService.core.data.OrdersRepository;
+import com.transac.OrdersService.core.events.OrderApprovedEvent;
 import com.transac.OrdersService.core.events.OrderCreatedEvent;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
@@ -27,5 +28,16 @@ public class OrderEventsHandler {
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
+    }
+
+    @EventHandler
+    public void on(OrderApprovedEvent event) {
+        OrderEntity orderEntity = ordersRepository.findByOrderId(event.getOrderId());
+        if(orderEntity == null) {
+            // TODO: Do something about it
+            return;
+        }
+        orderEntity.setOrderStatus(event.getOrderStatus());
+        ordersRepository.save(orderEntity);
     }
 }

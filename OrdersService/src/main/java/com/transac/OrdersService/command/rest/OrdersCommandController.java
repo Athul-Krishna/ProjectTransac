@@ -1,6 +1,6 @@
 package com.transac.OrdersService.command.rest;
 
-import com.transac.OrdersService.command.CreateOrderCommand;
+import com.transac.OrdersService.command.commands.CreateOrderCommand;
 import com.transac.OrdersService.core.models.OrderStatus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.beans.factory.annotation.Autowired;
