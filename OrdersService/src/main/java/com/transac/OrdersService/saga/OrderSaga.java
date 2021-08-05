@@ -1,11 +1,15 @@
 package com.transac.OrdersService.saga;
 
 import com.transac.OrdersService.command.commands.ApproveOrderCommand;
+import com.transac.OrdersService.command.commands.RejectOrderCommand;
 import com.transac.OrdersService.core.events.OrderApprovedEvent;
 import com.transac.OrdersService.core.events.OrderCreatedEvent;
+import com.transac.OrdersService.core.events.OrderRejectedEvent;
+import com.transac.core.commands.CancelProductReservationCommand;
 import com.transac.core.commands.ProcessPaymentCommand;
 import com.transac.core.commands.ReserveProductCommand;
 import com.transac.core.events.PaymentProcessedEvent;
+import com.transac.core.events.ProductReservationCancelledEvent;
 import com.transac.core.events.ProductReservedEvent;
 import com.transac.core.models.User;
 import com.transac.core.query.FetchUserPaymentDetailsQuery;
@@ -74,11 +78,13 @@ public class OrderSaga {
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());
             // Start compensating transaction
+            cancelProductReservation(productReservedEvent, ex.getMessage());
             return;
         }
 
         if(userPaymentDetails == null) {
             // Start compensating transaction
+            cancelProductReservation(productReservedEvent, "Could not fetch user payment details");
             return;
         }
 
@@ -95,12 +101,25 @@ public class OrderSaga {
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             // Start compensating transaction
+            cancelProductReservation(productReservedEvent, e.getMessage());
+            return;
         }
 
         if(result == null) {
             LOGGER.info("The ProcessPaymentCommand resulted in NULL. Initiating a compensating transaction");
             // Start compensating transaction
+            cancelProductReservation(productReservedEvent, "Could not process payment with provided payment details");
         }
+    }
+
+    private void cancelProductReservation(ProductReservedEvent productReservedEvent, String reason) {
+        CancelProductReservationCommand cancelProductReservationCommand = CancelProductReservationCommand.builder()
+                .productId(productReservedEvent.getProductId())
+                .quantity(productReservedEvent.getQuantity())
+                .orderId(productReservedEvent.getOrderId())
+                .userId(productReservedEvent.getUserId())
+                .reason(reason).build();
+        commandGateway.send(cancelProductReservationCommand);
     }
 
     @SagaEventHandler(associationProperty = "orderId")
@@ -115,5 +134,18 @@ public class OrderSaga {
     public void handle(OrderApprovedEvent orderApprovedEvent) {
         LOGGER.info("Order is approved! Order saga is complete for orderId: " + orderApprovedEvent.getOrderId());
         // SagaLifecycle.end();
+    }
+
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(ProductReservationCancelledEvent productReservationCancelledEvent) {
+        // Create and send a Reject Order command
+        RejectOrderCommand rejectOrderCommand = new RejectOrderCommand(productReservationCancelledEvent.getOrderId(), productReservationCancelledEvent.getReason());
+        commandGateway.send(rejectOrderCommand);
+    }
+
+    @EndSaga
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(OrderRejectedEvent orderRejectedEvent) {
+        LOGGER.info("Successfully rejected order with id: " + orderRejectedEvent.getOrderId());
     }
 }

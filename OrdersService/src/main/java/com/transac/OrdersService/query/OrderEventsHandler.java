@@ -4,6 +4,7 @@ import com.transac.OrdersService.core.data.OrderEntity;
 import com.transac.OrdersService.core.data.OrdersRepository;
 import com.transac.OrdersService.core.events.OrderApprovedEvent;
 import com.transac.OrdersService.core.events.OrderCreatedEvent;
+import com.transac.OrdersService.core.events.OrderRejectedEvent;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.springframework.stereotype.Component;
@@ -37,6 +38,13 @@ public class OrderEventsHandler {
             // TODO: Do something about it
             return;
         }
+        orderEntity.setOrderStatus(event.getOrderStatus());
+        ordersRepository.save(orderEntity);
+    }
+
+    @EventHandler
+    public void on(OrderRejectedEvent event) {
+        OrderEntity orderEntity = ordersRepository.findByOrderId(event.getOrderId());
         orderEntity.setOrderStatus(event.getOrderStatus());
         ordersRepository.save(orderEntity);
     }

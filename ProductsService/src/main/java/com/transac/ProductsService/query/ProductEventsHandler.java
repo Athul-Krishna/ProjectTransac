@@ -3,6 +3,7 @@ package com.transac.ProductsService.query;
 import com.transac.ProductsService.core.data.ProductEntity;
 import com.transac.ProductsService.core.data.ProductsRepository;
 import com.transac.ProductsService.core.events.ProductCreatedEvent;
+import com.transac.core.events.ProductReservationCancelledEvent;
 import com.transac.core.events.ProductReservedEvent;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
@@ -52,5 +53,12 @@ public class ProductEventsHandler {
 
         LOGGER.info("ProductReservedEvent is called for orderId: " + event.getOrderId() +
                 " and productId: " + event.getProductId());
+    }
+
+    @EventHandler
+    public void on(ProductReservationCancelledEvent event) {
+        ProductEntity productEntity = productsRepository.findByProductId(event.getProductId());
+        productEntity.setQuantity(productEntity.getQuantity() + event.getQuantity());
+        productsRepository.save(productEntity);
     }
 }
