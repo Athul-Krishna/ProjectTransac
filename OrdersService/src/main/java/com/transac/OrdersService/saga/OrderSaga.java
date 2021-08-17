@@ -5,6 +5,8 @@ import com.transac.OrdersService.command.commands.RejectOrderCommand;
 import com.transac.OrdersService.core.events.OrderApprovedEvent;
 import com.transac.OrdersService.core.events.OrderCreatedEvent;
 import com.transac.OrdersService.core.events.OrderRejectedEvent;
+import com.transac.OrdersService.core.models.OrderSummary;
+import com.transac.OrdersService.query.FindOrderQuery;
 import com.transac.core.commands.CancelProductReservationCommand;
 import com.transac.core.commands.ProcessPaymentCommand;
 import com.transac.core.commands.ReserveProductCommand;
@@ -25,6 +27,7 @@ import org.axonframework.modelling.saga.SagaEventHandler;
 import org.axonframework.modelling.saga.SagaLifecycle;
 import org.axonframework.modelling.saga.StartSaga;
 import org.axonframework.queryhandling.QueryGateway;
+import org.axonframework.queryhandling.QueryUpdateEmitter;
 import org.axonframework.spring.stereotype.Saga;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +54,9 @@ public class OrderSaga {
     @Autowired
     private transient DeadlineManager deadlineManager;
 
+    @Autowired
+    private transient QueryUpdateEmitter queryUpdateEmitter;
+
     @StartSaga
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(OrderCreatedEvent orderCreatedEvent) {
@@ -68,6 +74,8 @@ public class OrderSaga {
             public void onResult(CommandMessage<? extends ReserveProductCommand> commandMessage, CommandResultMessage<?> commandResultMessage) {
                 if(commandResultMessage.isExceptional()) {
                     // Start a compensating transaction
+                    RejectOrderCommand rejectOrderCommand = new RejectOrderCommand(orderCreatedEvent.getOrderId(), commandResultMessage.exceptionResult().getMessage());
+                    commandGateway.send(rejectOrderCommand);
                 }
             }
         });
@@ -108,7 +116,7 @@ public class OrderSaga {
 
         String result = null;
         try {
-            result = commandGateway.sendAndWait(processPaymentCommand, 10, TimeUnit.SECONDS);
+            result = commandGateway.sendAndWait(processPaymentCommand);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             // Start compensating transaction
@@ -154,6 +162,9 @@ public class OrderSaga {
     public void handle(OrderApprovedEvent orderApprovedEvent) {
         LOGGER.info("Order is approved! Order saga is complete for orderId: " + orderApprovedEvent.getOrderId());
         // SagaLifecycle.end();
+        queryUpdateEmitter.emit(FindOrderQuery.class, query -> true,
+                new OrderSummary(orderApprovedEvent.getOrderId(), orderApprovedEvent.getOrderStatus(), "")
+        );
     }
 
     @SagaEventHandler(associationProperty = "orderId")
@@ -167,6 +178,9 @@ public class OrderSaga {
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(OrderRejectedEvent orderRejectedEvent) {
         LOGGER.info("Successfully rejected order with id: " + orderRejectedEvent.getOrderId());
+        queryUpdateEmitter.emit(FindOrderQuery.class, query -> true,
+                new OrderSummary(orderRejectedEvent.getOrderId(), orderRejectedEvent.getOrderStatus(), orderRejectedEvent.getReason())
+        );
     }
 
     @DeadlineHandler(deadlineName = PAYMENT_DEADLINE)
